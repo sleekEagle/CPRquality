@@ -139,7 +139,7 @@ len(peaks)
 fig, ax = plt.subplots()
 ax.plot(resampled.index[750:1750],cpr_smooth)
 ax.plot(peak_ind,cpr_smooth[peaks],"x")
-plt.title("Peak detection for the normalized, smoothed smartwatch based Z acceleration")
+plt.title("Peak detection for the normalized, smoothed \n smartwatch based Z acceleration")
 plt.xlabel('time in seconds')
 plt.savefig("/home/sleekeagle/vuzix/CPR_rate_measuring/experiment_2022_03_30/plots/peak_detection_acc.png",dpi=300)
 

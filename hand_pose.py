@@ -21,7 +21,14 @@ mp_hands = mp.solutions.hands
 
 '/home/sleekeagle/vuzix/CPR_rate_measuring/experiment_2022_03_30/detection.avi'
 
-def get_hand_coordinates(video_in,video_out):
+get_hand_coordinates('/home/sleekeagle/vuzix/CPR_rate_measuring/experiment_2022_03_30/first_person_CPR_dummy_trimmed_demo.mp4',
+                     '/home/sleekeagle/vuzix/CPR_rate_measuring/experiment_2022_03_30/demo_trimmed_detection.mp4',
+                     True)
+
+'''
+write_all - write all frames to the output regardless if hands are detected
+'''
+def get_hand_coordinates(video_in,video_out,write_all):
     #open video 
     cap = cv2.VideoCapture(video_in)
     #get the frame rate of the video
@@ -51,7 +58,7 @@ def get_hand_coordinates(video_in,video_out):
             if(cnt==0):
                 #output video file
                 out = cv2.VideoWriter(video_out,
-                                      cv2.VideoWriter_fourcc(*'DIVX'), 30, size)
+                                      cv2.VideoWriter_fourcc(*'MP4V'), 30, size)
             cnt+=1
             if(cnt%100==0):
                 print(str(cnt) +" frames procesed")
@@ -79,6 +86,8 @@ def get_hand_coordinates(video_in,video_out):
         
         image.flags.writeable = True
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        
+            
         if results.multi_hand_landmarks:
             for hand_landmarks in results.multi_hand_landmarks:
                 y_vals.append(hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y)
@@ -88,12 +97,17 @@ def get_hand_coordinates(video_in,video_out):
                     mp_hands.HAND_CONNECTIONS,
                     mp_drawing_styles.get_default_hand_landmarks_style(),
                     mp_drawing_styles.get_default_hand_connections_style())
-            out.write(image)
         else:
             y_vals.append(math.nan)
             # Flip the image horizontally for a selfie-view display.
             #cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
             #img_array.append(image)
+            
+        if(write_all):
+            out.write(image)
+        else:
+            if results.multi_hand_landmarks:
+                out.write(image)
  
     out.release()        
     cap.release()
