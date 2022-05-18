@@ -10,6 +10,8 @@ Then we detecte and matched SIFT features from two photos of a floor with a patt
 The matching is still pretty good.
 ![Alt text](images/floor_pattern_matches.jpg "curb matches")
 
-Then we detecte and matched SIFT features from two photos of a curb. 
-In this case the SIFT based matching fails miserably
+Then we detecte and matched SIFT features from two photos of a curb.\
+In this case the SIFT based matching fails miserably.\
+Either we have to resort to another method or implement a way to ignore the incorrect matches.
+
 ![Alt text](images/curb_matches.jpg "curb matches")
