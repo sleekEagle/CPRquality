@@ -29,8 +29,8 @@ cv2.imwrite('/home/sleekeagle/vuzix/CPR_rate_measuring/SIFT_features/images/keyp
 
 #two images
 # read images
-img1 = cv2.imread('/home/sleekeagle/vuzix/CPR_rate_measuring/SIFT_features/images/PXL_20220518_143214775.MP.jpg')  
-img2 = cv2.imread('/home/sleekeagle/vuzix/CPR_rate_measuring/SIFT_features/images/PXL_20220518_143215729.MP.jpg') 
+img1 = cv2.imread('/home/sleekeagle/vuzix/CPR_rate_measuring/SIFT_features/images/floor_pattern_1.resized.jpg')  
+img2 = cv2.imread('/home/sleekeagle/vuzix/CPR_rate_measuring/SIFT_features/images/floor_pattern_2.resized.jpg') 
 
 img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY)
 img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
@@ -49,3 +49,4 @@ matches = sorted(matches, key = lambda x:x.distance)
 
 img3 = cv2.drawMatches(img1, keypoints_1, img2, keypoints_2, matches[:50], img2, flags=2)
 plt.imshow(img3),plt.show()
+cv2.imwrite('/home/sleekeagle/vuzix/CPR_rate_measuring/SIFT_features/images/floor_pattern_matches.jpg',img3)
