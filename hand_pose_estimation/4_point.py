@@ -12,6 +12,7 @@ import math
 From the paper "Random Sample Consensus: A Paradigm for Model Fitting with Apphcatlons to Image
             Analysis and Automated Cartography" by Fischler et.al
 '''
+f=0.3048
 A = np.array([[6, 1, 1],
               [4, -2, 5],
               [2, 8, 7]])
@@ -52,3 +53,14 @@ T=np.matmul(np.matmul(np.linalg.inv(Q),W),P)
 VLI=np.matmul(np.linalg.inv(T),np.array([0,0,1]))
 #distance from the origin of the image plane to VLI
 DI=abs(VLI[2]/math.sqrt(VLI[0]**2 + VLI[1]**2))
+#solve for the dihedral angle theta between the image and the object plane
+np.arctan(f/DI)
+#obtain the vanishing line in the object plane by mapping the ideal line of the image plane
+VLO=np.matmul(T,np.array([0,0,1]))
+#compute the point PPO in the object plane (the point where optical axis intersects the object plane)
+PPO=np.matmul(np.linalg.inv(T).transpose(),np.array([0,0,1]))
+#calculate the distance from PPO to VLO
+DO=(VLO[0]*PPO[0] + VLO[1]*PPO[1] + VLO[2]*PPO[2])/(PPO[2]*math.sqrt(VLO[0]**2 + VLO[1]**2))
+#solve for the plan angle between the normal to VLO and the X axis in the object plane
+S=np.arctan(-VLO[1]/VLO[0])
+
