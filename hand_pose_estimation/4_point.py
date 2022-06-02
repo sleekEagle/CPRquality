@@ -7,12 +7,11 @@ Created on Tue May 31 20:45:00 2022
 
 
 import numpy as np
+import math
 '''
 From the paper "Random Sample Consensus: A Paradigm for Model Fitting with Apphcatlons to Image
             Analysis and Automated Cartography" by Fischler et.al
 '''
-
-
 A = np.array([[6, 1, 1],
               [4, -2, 5],
               [2, 8, 7]])
@@ -47,3 +46,9 @@ W=np.array([[w1,0,0],
             [0,0,1]])
 
 T=np.matmul(np.matmul(np.linalg.inv(Q),W),P)
+
+
+#obtain the vanishing line on the image plane by mapping the ideal line on the object plane 
+VLI=np.matmul(np.linalg.inv(T),np.array([0,0,1]))
+#distance from the origin of the image plane to VLI
+DI=abs(VLI[2]/math.sqrt(VLI[0]**2 + VLI[1]**2))
