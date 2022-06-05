@@ -10,6 +10,7 @@ import numpy as np
 import cv2 as cv
 import glob
 import os
+import json
 
 # termination criteria
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
@@ -51,14 +52,18 @@ for fname in images:
 
 ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
-
-
-
-
-
-
-img_grayscale = cv.imread(path,0)
-img_grayscale = cv.resize(img_grayscale, (960, 540))
-cv.imshow('graycsale image',img_grayscale)
-cv.waitKey(0)
-cv.destroyAllWindows()
+with open('/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/calib_parameters.txt','w') as f:
+    f.write("intrinsic camera matrix (3x3) \n")
+    #write the intrinsic matrix
+    for i in range(mtx.shape[0]):
+        for j in range(mtx.shape[1]):
+            f.write(str(mtx[i][j]))
+            if(j!=mtx.shape[1]-1):
+                f.write(",")
+        f.write("\n")
+    f.write("distortion coefficients (1x5) \n")
+    #write distortion coefficients
+    for i in range(dist.shape[1]):
+        f.write(str(dist[0][i]))
+        if(i!=dist.shape[1]-1):
+            f.write(",")
