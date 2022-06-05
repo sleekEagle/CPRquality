@@ -52,9 +52,9 @@ Y=|SQRT(L2^2 - X^2)|
 
 L=[93.71,92.95,90.93,88.81]
 D=[23.55,44.90,64.52]
-coordinates=[]
+coordinates=[[0,0,1],[0,L[0],1]]
 for i in range(1,len(L)):
     x=(L[0]**2 + L[i]**2 - D[i-1]**2)/(2*L[0])
     y=math.sqrt(L[i]**2-x**2)
-    coordinates.append((x,y))
+    coordinates.append([x,y,1])
 
