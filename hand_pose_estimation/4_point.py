@@ -48,11 +48,11 @@ def get_camera_pose(p1,p2,p3,p4,q1,q2,q3,q4,f):
                 [0,w2,0],
                 [0,0,1]])
     
-    T=np.matmul(np.matmul(np.linalg.inv(Q),W),P)
-    
+    T=np.matmul(np.matmul(np.linalg.inv(Q),W),P).transpose()
+    invT=np.linalg.inv(T)
     
     #obtain the vanishing line on the image plane by mapping the ideal line on the object plane 
-    VLI=np.matmul(np.linalg.inv(T),np.array([0,0,1]))
+    VLI=np.matmul(invT.transpose(),np.array([0,0,1]))
     #distance from the origin of the image plane to VLI
     DI=abs(VLI[2]/math.sqrt(VLI[0]**2 + VLI[1]**2))
     #solve for the dihedral angle theta between the image and the object plane

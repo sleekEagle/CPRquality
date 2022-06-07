@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 
-hand_picture_path='/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/hand_211.jpg'
+hand_picture_path='/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/hand_214.jpg'
 
 cam_param_path='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/calib_parameters.txt'
 #read intrinsic matrix and distortion coefficients
@@ -37,7 +37,7 @@ with open(cam_param_path) as f:
 #undistort image
 img = cv2.imread(hand_picture_path)
 undist = cv2.undistort(img, intrinsic, dist, None, intrinsic)
-cv2.imwrite('/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/undist.png', undist)
+cv2.imwrite('/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/undist.jpg', undist)
 
 
 #detect keypoints in the hand
@@ -45,7 +45,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
-IMAGE_FILES = ["/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/hand_212.jpg"]
+IMAGE_FILES = ["/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/undist.jpg"]
 
 with mp_hands.Hands(
     static_image_mode=True,
@@ -69,7 +69,7 @@ with mp_hands.Hands(
                 mp_hands.HAND_CONNECTIONS,
                 mp_drawing_styles.get_default_hand_landmarks_style(),
                 mp_drawing_styles.get_default_hand_connections_style())
-        cv2.imwrite('/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/pose_212.jpg', cv2.flip(annotated_image, 1))
+        cv2.imwrite('/home/sleekeagle/vuzix/CPR_rate_measuring/hand_pose_estimation/pose.jpg', cv2.flip(annotated_image, 1))
     
         '''
         We need to extract the 2D coordinates of wrist, knucles of index, middle and ring fingers. 
@@ -85,10 +85,12 @@ with mp_hands.Hands(
                        [hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].x*image_width,
                         hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y*image_height,1]]
         
-        
+
 #get real world coordinates of these points
 import physical_hand_measurement
 physical_coordinates=physical_hand_measurement.coordinates[0:4]
+
+f=(intrinsic[0][0]+intrinsic[1][1])/2
 
 #find the homography matrix between the physical and image 
 Q=np.array([physical_coordinates[0],physical_coordinates[1],physical_coordinates[2]])
@@ -104,23 +106,49 @@ W=np.array([[w1,0,0],
             [0,w2,0],
             [0,0,1]])
 
-H=np.matmul(np.matmul(np.linalg.inv(Q),W),P)
+T=np.matmul(np.matmul(np.linalg.inv(Q),W),P).transpose()
+invT=np.linalg.inv(T)
 
 out=np.matmul(T.transpose(),physical_coordinates[3])
 (out[0]/out[2],out[1]/out[2])
 
-'''
-H=K*T
-K - intrinsic matrix
-T - world to camera coordinate system transformation matrix
-T=K^(-1)*H
-'''
+#obtain the vanishing line on the image plane by mapping the ideal line on the object plane 
+VLI=np.matmul(np.linalg.inv(T).transpose(),np.array([0,0,1]))
+#distance from the origin of the image plane to VLI
+DI=abs(VLI[2]/math.sqrt(VLI[0]**2 + VLI[1]**2))
+#solve for the dihedral angle theta between the image and the object plane
+theta=np.arctan(f/DI)
+#obtain the vanishing line in the object plane by mapping the ideal line of the image plane
+VLO=np.matmul(T,np.array([0,0,1]))
+#compute the point PPO in the object plane (the point where optical axis intersects the object plane)
+PPO=np.matmul(np.linalg.inv(T).transpose(),np.array([0,0,1]))
+#calculate the distance from PPO to VLO
+DO=abs(VLO[0]*PPO[0] + VLO[1]*PPO[1] + VLO[2]*PPO[2])/(PPO[2]*math.sqrt(VLO[0]**2 + VLO[1]**2))
+#solve for the plan angle between the normal to VLO and the X axis in the object plane
+S=np.arctan(-VLO[1]/VLO[0])
+#find the sign of XSGN and YSGN
+if((VLO[0]*PPO[0]+VLO[1]*PPO[1]+VLO[2]*PPO[2])/(VLO[0]*PPO[2])<0):
+    XSGN=1
+else:
+    XSGN=-1
 
-T=np.linalg.inv(intrinsic)*H
-trnsl=T[0:3,-1]
+if((VLO[0]*PPO[0]+VLO[1]*PPO[1]+VLO[2]*PPO[2])/(VLO[1]*PPO[2])<0):
+    YSGN=1
+else:
+    YSGN=-1
 
+DCP=DO*math.sin(theta)
+XCP=XSGN*abs(DCP*math.sin(theta)*math.cos(S))+PPO[0]/PPO[2]
+YCP=YSGN*abs(DCP*math.sin(theta)*math.sin(S))+PPO[1]/PPO[2]
+ZCP=DCP*math.cos(theta)
 
+theta/math.pi*180
+S/math.pi*180
 
+a,b,c=-3.08543363e-04,2.67868644e-04,8.22235871e-01
+x=np.linspace(-10,10,100)
+y=(-c-a*x)/b
+plt.plot(x, y, '-r', label='y=2x+1')
 
 
     
