@@ -12,12 +12,26 @@ import glob
 import os
 import json
 
+'''
+Calibrate the camera and store the calibration matrix and distortion coefficients in a file
+'''
+
+IMG_PATH='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/pixel4a_f0.3/'
+CALIB_PARAM_PATH='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/calib_parameters_pixel4a_f0.3.txt'
+
+#number of inner corners (where two black squares meet) in short and long dirctions
+n_inner_corners_long=9
+n_inner_corners_short=6
+
+
+
+
 # termination criteria
 criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
 
 # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(6,5,0)
-objp = np.zeros((6*9,3), np.float32)
-objp[:,:2] = np.mgrid[0:9,0:6].T.reshape(-1,2)
+objp = np.zeros((n_inner_corners_short*n_inner_corners_long,3), np.float32)
+objp[:,:2] = np.mgrid[0:n_inner_corners_long,0:n_inner_corners_short].T.reshape(-1,2)
 
 # Arrays to store object points and image points from all the images.
 objpoints = [] # 3d point in real world space
@@ -25,10 +39,8 @@ imgpoints = [] # 2d points in image plane.
 images = glob.glob('*.jpg')
 
 #read all files in the dir
-path='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/test1_pixel/'
-images=os.listdir(path)
+images=os.listdir(IMG_PATH)
 images=[path+img for img in images]
-fname=images[0]
 
 
 for fname in images:
@@ -36,7 +48,7 @@ for fname in images:
     #img = cv.resize(img, (403,302))
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     # Find the chess board corners
-    ret, corners = cv.findChessboardCorners(gray, (9,6), None)
+    ret, corners = cv.findChessboardCorners(gray, (n_inner_corners_long,n_inner_corners_short), None)
     # If found, add object points, image points (after refining them)
     if ret == True:
         objpoints.append(objp)
@@ -52,7 +64,7 @@ for fname in images:
 
 ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
-with open('/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/calib_parameters.txt','w') as f:
+with open(CALIB_PARAM_PATH,'w') as f:
     f.write("intrinsic camera matrix (3x3) \n")
     #write the intrinsic matrix
     for i in range(mtx.shape[0]):

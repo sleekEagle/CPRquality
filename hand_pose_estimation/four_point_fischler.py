@@ -35,10 +35,10 @@ q4=[-40,-240,1]
 
 def get_camera_pose_Fischler(p1,p2,p3,p4,q1,q2,q3,q4,f,img_height,img_width):
     
-    q1=[q1[0],img_width-q1[1]]
-    q2=[q2[0],img_width-q2[1]]
-    q3=[q3[0],img_width-q3[1]]
-    q4=[q4[0],img_width-q4[1]]
+    q1=[q1[0],img_width-q1[1],1]
+    q2=[q2[0],img_width-q2[1],1]
+    q3=[q3[0],img_width-q3[1],1]
+    q4=[q4[0],img_width-q4[1],1]
 
     Q=np.array([q1,q2,q3])
     P=np.array([p1,p2,p3])
@@ -96,7 +96,7 @@ def get_camera_pose_Fischler(p1,p2,p3,p4,q1,q2,q3,q4,f,img_height,img_width):
     YCP=YSGN*abs(DCP*math.sin(theta)*math.sin(S))+PPO[1]/PPO[2]
     ZCP=DCP*math.cos(theta)
     
-    return XCP,YCP,ZCP
+    return XCP,YCP,ZCP,theta,S
     
 
 
