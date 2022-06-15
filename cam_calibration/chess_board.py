@@ -16,8 +16,8 @@ import json
 Calibrate the camera and store the calibration matrix and distortion coefficients in a file
 '''
 
-IMG_PATH='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/pixel4a_f0.3/'
-CALIB_PARAM_PATH='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/calib_parameters_pixel4a_f0.3.txt'
+IMG_PATH='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/pixel4a_f0.6/'
+CALIB_PARAM_PATH='/home/sleekeagle/vuzix/CPR_rate_measuring/cam_calibration/calib_parameters_pixel4a_f0.6.txt'
 
 #number of inner corners (where two black squares meet) in short and long dirctions
 n_inner_corners_long=9
@@ -40,7 +40,7 @@ images = glob.glob('*.jpg')
 
 #read all files in the dir
 images=os.listdir(IMG_PATH)
-images=[path+img for img in images]
+images=[IMG_PATH+img for img in images]
 
 
 for fname in images:
