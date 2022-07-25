@@ -46,6 +46,27 @@ Compatible with mobile phones/computers:\
 Moto g100, and Moto edge 30 pro and edge plus\
 Windows 11, not compatible with Linux\
 
+# ThirdEye X2 mixed reality glasses
+Cameras:\
+RGB 13M pixel camera\
+Depth sensors\
+FOV = 42 degrees\
+
+Connection:\
+WiFi, BT\
+
+Android\
+Thermal sensor\
+
+2 mics\
+
+
+
+
+
+
+
+
 
 
 
