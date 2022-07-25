@@ -1,5 +1,5 @@
 # Atheer Air Glasses
-https://vandrico.com/wearables/device/atheer-air-glasses.html\
+https://vandrico.com/wearables/device/atheer-air-glasses.html \ 
 OS : Android\
 Camera/s :\
   dual RGB cameras \
@@ -13,6 +13,10 @@ Gesture Interface, GPS, Gyroscope, Magnetometer, Microphone, Vibrator & Compass
 
 Networking:\
 WiFi, Cellular Network
+
+*Cannot find details on their own website. It is possible this product is discontinued
+
+
 
 # Magic Leap 2
 https://www.magicleap.com/device\
