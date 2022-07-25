@@ -14,7 +14,7 @@ Gesture Interface, GPS, Gyroscope, Magnetometer, Microphone, Vibrator & Compass
 Networking:
 WiFi, Cellular Network
 
-#Magic Leap 2
+# Magic Leap 2
 https://www.magicleap.com/device
 Camera/s :
   3 Wider FoV World Cameras
