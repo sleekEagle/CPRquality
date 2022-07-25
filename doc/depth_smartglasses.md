@@ -1,18 +1,18 @@
 # Atheer Air Glasses
-https://vandrico.com/wearables/device/atheer-air-glasses.html
-OS : Android
-Camera/s :
-  dual RGB cameras
-  3D depth camera
-  Field Of View: 50 degrees
-GPU: NVIDIA Tegra K1 processor
-Sensors :
-Depth Camera, Photo Camera, Video Camera, Accelerometer, Ambient Light Sensor, Audio Jack, 
-Audio Speaker, Barometer, Button Interface, 
-Gesture Interface, GPS, Gyroscope, Magnetometer, Microphone, Vibrator & Compass
+https://vandrico.com/wearables/device/atheer-air-glasses.html\
+OS : Android\
+Camera/s :\
+  dual RGB cameras \
+  3D depth camera \
+  Field Of View: 50 degrees \
+GPU: NVIDIA Tegra K1 processor \
+Sensors : \
+Depth Camera, Photo Camera, Video Camera, Accelerometer, Ambient Light Sensor, Audio Jack, \
+Audio Speaker, Barometer, Button Interface, \
+Gesture Interface, GPS, Gyroscope, Magnetometer, Microphone, Vibrator & Compass\
 
-Networking:
-WiFi, Cellular Network
+Networking:\
+WiFi, Cellular Network\
 
 # Magic Leap 2
 https://www.magicleap.com/device
