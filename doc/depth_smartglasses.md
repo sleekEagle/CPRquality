@@ -19,6 +19,7 @@ WiFi, Cellular Network
 
 
 # Magic Leap 2
+available on September the 30th \
 https://www.magicleap.com/device\
 Camera/s :\
   3 Wider FoV World Cameras\
@@ -63,6 +64,10 @@ Android\
 Thermal sensor\
 
 2 mics\
+
+# Review on 3D cameras
+https://rosindustrial.org/3d-camera-survey \
+
 
 
 
