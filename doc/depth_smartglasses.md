@@ -65,6 +65,9 @@ Thermal sensor\
 
 2 mics\
 
+# HoloLens 2
+https://www.microsoft.com/en-us/d/hololens-2/91pnzzznzwcp?activetab=pivot:techspecstab#tab168f6c179-fc8f-4d8a-ae0a-95e154cda33c \
+
 # Review on 3D cameras
 https://rosindustrial.org/3d-camera-survey \
 
