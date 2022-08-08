@@ -67,6 +67,13 @@ Thermal sensor\
 
 # HoloLens 2
 https://www.microsoft.com/en-us/d/hololens-2/91pnzzznzwcp?activetab=pivot:techspecstab#tab168f6c179-fc8f-4d8a-ae0a-95e154cda33c \
+1 MP depth camera \
+head tracking : 4 visible light cameras \
+eye tracking : 2 IR cameras \ 
+8MP stills 1080p30 video camera \
+mic array 5 channels \
+WiFi, BT, USB-C \
+
 
 # Review on 3D cameras
 https://rosindustrial.org/3d-camera-survey \
