@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_DEPRECATE
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -6,7 +7,7 @@
 #include <k4arecord/playback.h>
 
 
-int main()
+int main(int argc, char** argv)
 {
     uint64_t recording_length;
     k4a_imu_sample_t imu_sample;
@@ -16,16 +17,28 @@ int main()
     k4a_float3_t gyro_val;
     uint64_t acc_ts;
     uint64_t gyro_ts;
+    const char *accfilename = "acc.csv";
+    const char* gyrofilename = "gyro.csv";
 
+
+
+    printf("saving data in %s \n",argv[1]);
     //create teh data file to write
     std::ofstream accfile;
     std::ofstream gyrofile;
-    accfile.open("C:\\Users\\lahir\\source\\repos\\azurekinect\\azurekinect\\acc.csv");
-    gyrofile.open("C:\\Users\\lahir\\source\\repos\\azurekinect\\azurekinect\\gyro.csv");
+    char* accpath=new char[strlen(argv[1]) + strlen(accfilename)];
+    strcpy(accpath,argv[1]);
+    strcat(accpath, accfilename);
+    char* gyropath = new char[strlen(argv[1]) + strlen(gyrofilename)];
+    strcpy(gyropath, argv[1]);
+    strcat(gyropath, gyrofilename);
 
-    std::cout << "Hello World!\n";
+    gyrofile.open(gyropath);
+    accfile.open(accpath);
+
+    printf("Opening video file at %s\n",argv[2]);
     k4a_playback_t playback_handle = NULL;
-    if (k4a_playback_open("C:\\Users\\lahir\\source\\repos\\azurekinect\\azurekinect\\vid.mkv", &playback_handle) != K4A_RESULT_SUCCEEDED)
+    if (k4a_playback_open(argv[2], &playback_handle) != K4A_RESULT_SUCCEEDED)
     {
         printf("Failed to open recording\n");
         goto Exit;
