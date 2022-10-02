@@ -67,7 +67,7 @@ static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t resolu
 }
 
 
-
+/*
 int main(int argc, char** argv)
 {
     static const int32_t defaultExposureAuto = -12;
@@ -373,4 +373,3 @@ Exit:
     return returnCode;
     
 }
-
