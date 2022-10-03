@@ -1,8 +1,8 @@
 ## Preparing data
 
-### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 30 frames at 30 frames per second)
+### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 40 frames at 30 frames per second)
 ```
- .\azurekinect.exe C:\\path\\to\\output\\file.mkv 30
+ .\azurekinect.exe C:\\path\\to\\output\\file.mkv 40
  ```
  
  ### View metadata of the .mkv file with ffmpeg (you need ffmpeg installed in your system)
