@@ -65,12 +65,6 @@ void inthand(int signum) {
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
-    {
-        printf("Need at least 2 arguments. Exiting...\n");
-        goto Exit;
-    }
-    printf("Starting the stream program...\n");
     static const int32_t defaultExposureAuto = -12;
     static const int32_t defaultGainAuto = -1;
     int returnCode = 1;
@@ -108,6 +102,11 @@ int main(int argc, char** argv)
 
    
     uint32_t device_count = k4a_device_get_installed_count();
+
+    if (argc < 2) {
+        printf("Need at least 2 args. Exiting..\n");
+        goto Exit;
+    }
 
     if (device_count == 0)
     {
@@ -237,7 +236,8 @@ int main(int argc, char** argv)
     }
     printf("Done Capturing first image....\n");
     k4a_capture_release(capture);
-    printf("Capturing images....\n");
+    printf("Streraming images...\n");
+
     char c;
     while ((!stop) && (captureFrameCount == -1)||(captureFrameCount-- > 0))
     {
