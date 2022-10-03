@@ -26,6 +26,8 @@
  ```
  Here -map 0:1 is the stream number (0:1) \
  image files are named originald$timestamp_offset$.png\
+ We need to add K4A_START_OFFSET_NS form earlier to this offset to get the actual timestamp of each image.\
+ Execute this ffmpeg command twice; once to get RGB images, once to get depth images.
  
  ### Extract IMU data
  
