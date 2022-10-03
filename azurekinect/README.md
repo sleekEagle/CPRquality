@@ -21,5 +21,14 @@
  TDEPTH - depth images from transformed to the point of view of the RGB camera
  
  ### Extract RGB and depth images from the video
+ ```
+ ffmpeg -skip_frame nokey -i .\vid.mkv -map 0:1 -vsync 0 -frame_pts true -r 10000 outputs/"originald%d.png"
+ ```
+ Here -map 0:1 is the stream number (0:1) \
+ image files are named originald$timestamp_offset$.png\
+ 
+ ### Extract IMU data
+ 
+ 
  
  
