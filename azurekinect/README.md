@@ -3,8 +3,13 @@
 ### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 30 frames at 30 frames per second)
 Goto stream directory
 ```
+ .\stream.exeout_path required_fps
  .\stream.exe C:\\path\\to\\output\\file.mkv 30
  ```
+ required_fps : [30,15,5]\
+ required_fps=-1 : capture till CTRL+C\
+ We can use Azure Kinect Viewer to view the file. Regular video players will not work. \
+ Azure Kinect Viewer : https://learn.microsoft.com/en-us/azure/kinect-dk/azure-kinect-viewer
 
 ### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 40 frames at 30 frames per second)
 ```
