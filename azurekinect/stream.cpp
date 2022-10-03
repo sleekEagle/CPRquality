@@ -237,7 +237,7 @@ int main(int argc, char** argv)
     }
     printf("Done Capturing first image....\n");
     k4a_capture_release(capture);
-
+    printf("Capturing images....\n");
     char c;
     while ((!stop) && (captureFrameCount == -1)||(captureFrameCount-- > 0))
     {
