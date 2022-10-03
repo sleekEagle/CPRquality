@@ -36,12 +36,12 @@ Goto stream directory
  Execute this ffmpeg command twice; once to get RGB images, once to get depth images.
  
  ### Extract IMU data
- Goto reader directory \
+ Goto reader directory 
  ```
   .\reader.exe C:\\output\\dir\\to\\acc_and_gyro\\csv_files\\  C:\\path\\to\\output\\file.mkv
  ```
  Format of the csv created : \
- timestamp of the IMU,x,y,z \
+ timestamp of the IMU,x,y,z 
  
  
  
