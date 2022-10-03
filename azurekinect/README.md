@@ -4,6 +4,7 @@
 Goto stream directory
 ```
  .\stream.exe C:\\path\\to\\output\\file.mkv 30
+ ```
 
 ### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 40 frames at 30 frames per second)
 ```
