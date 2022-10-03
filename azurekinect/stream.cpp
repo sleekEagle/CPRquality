@@ -65,6 +65,12 @@ void inthand(int signum) {
 
 int main(int argc, char** argv)
 {
+    if (argc < 2)
+    {
+        printf("Need at least 2 arguments. Exiting...\n");
+        goto Exit;
+    }
+    printf("Starting the stream program...\n");
     static const int32_t defaultExposureAuto = -12;
     static const int32_t defaultGainAuto = -1;
     int returnCode = 1;

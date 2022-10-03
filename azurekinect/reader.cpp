@@ -6,6 +6,11 @@
 #include <k4arecord/record.h>
 #include <k4arecord/playback.h>
 
+/*
+command line arguments 
+1. the output directory path for the acc and gyr data csv files
+2. path to the Azure kinect mkv file to extract data from 
+*/
 
 int main(int argc, char** argv)
 {

@@ -1,8 +1,9 @@
 ## Preparing data
 
 ### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 30 frames at 30 frames per second)
+Goto stream directory \
 ```
- .\azurekinect.exe C:\\path\\to\\output\\file.mkv 30
+ .\stream.exe C:\\path\\to\\output\\file.mkv 30
  ```
  
  ### View metadata of the .mkv file with ffmpeg (you need ffmpeg installed in your system)
@@ -30,6 +31,13 @@
  Execute this ffmpeg command twice; once to get RGB images, once to get depth images.
  
  ### Extract IMU data
+ Goto reader directory \
+ ```
+  .\reader.exe C:\\output\\dir\\to\\acc_and_gyro\\csv_files\\  C:\\path\\to\\output\\file.mkv
+ ```
+ Format of the csv created : \
+ timestamp of the IMU,x,y,z \
+ 
  
  
  
