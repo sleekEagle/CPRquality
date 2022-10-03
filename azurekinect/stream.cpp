@@ -6,21 +6,14 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <k4arecord/record.h>
+#include <signal.h>
+#include <conio.h>
+#include <cstdlib>
 
 using namespace cv;
 using namespace std;
 
-/*
-creates a mkv video with IMU data, RGB and depth video tracks. 
-There is a custom track called "TDEPTH" which is a depth images transformed into RGB camera coordinates
-camera frame rate = 30
-change here :
-k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-config.camera_fps = K4A_FRAMES_PER_SECOND_30;
-
-number of frames captured in the video:
-int captureFrameCount=30;
-*/
+volatile sig_atomic_t stop;
 
 
 static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t resolution,
@@ -66,8 +59,10 @@ static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t resolu
     return true;
 }
 
+void inthand(int signum) {
+    stop = 1;
+}
 
-/*
 int main(int argc, char** argv)
 {
     static const int32_t defaultExposureAuto = -12;
@@ -75,12 +70,12 @@ int main(int argc, char** argv)
     int returnCode = 1;
     k4a_device_t device = NULL;
     const int32_t TIMEOUT_IN_MS = 1000;
-    int captureFrameCount=30;
+    //-1 : capturing until CTRL+C, otherwise number of frames captured
+    int captureFrameCount= atoi(argv[2]);
+    printf("captureframe count = % d\n",captureFrameCount);
     k4a_capture_t capture = NULL;
     k4a_transformation_t transformation = NULL;
     FILE* fptr;
-    const char* recording_filename = "C:\\Users\\lahir\\source\\repos\\azurekinect\\azurekinect\\vid.mkv";
-    int recording_length = 10;
     int absoluteExposureValue = defaultExposureAuto;
     int gain = defaultGainAuto;
     bool firstphoto = false;
@@ -88,6 +83,7 @@ int main(int argc, char** argv)
     uint32_t color_width, color_height;
     k4a_image_t transformed_depth_image = NULL;
 
+    signal(SIGINT, inthand);
 
     struct BITMAPINFOHEADER
     {
@@ -125,7 +121,7 @@ int main(int argc, char** argv)
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
     config.camera_fps = K4A_FRAMES_PER_SECOND_30;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
-    config.color_resolution = K4A_COLOR_RESOLUTION_2160P;
+    config.color_resolution = K4A_COLOR_RESOLUTION_720P;
     config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
     config.synchronized_images_only = true;
     
@@ -155,7 +151,7 @@ int main(int argc, char** argv)
 
 
     k4a_record_t recording;
-    if (K4A_RESULT_SUCCEEDED != k4a_record_create(recording_filename, device, config, &recording))
+    if (K4A_RESULT_SUCCEEDED != k4a_record_create(argv[1], device, config, &recording))
     {
         printf("Failed to create record \n");
         goto Exit;
@@ -173,7 +169,7 @@ int main(int argc, char** argv)
         color_width * 2,
         &transformed_depth_image))
     {
-        printf("Failed to create transformed depth image\n");
+        printf("Failed to create transformed color image\n");
         return false;
     }
     if (transformed_depth_image)
@@ -236,8 +232,8 @@ int main(int argc, char** argv)
     printf("Done Capturing first image....\n");
     k4a_capture_release(capture);
 
-
-    while (captureFrameCount-- > 0)
+    char c;
+    while ((!stop) && (captureFrameCount == -1)||(captureFrameCount-- > 0))
     {
         k4a_image_t colorimage;
         k4a_image_t depthimage;
@@ -300,10 +296,10 @@ int main(int argc, char** argv)
         depthimage = k4a_capture_get_depth_image(capture);
         if (depthimage != NULL)
         {
-            printf(" | Depth16 res:%4dx%4d stride:%5d\n",
-                k4a_image_get_height_pixels(depthimage),
-                k4a_image_get_width_pixels(depthimage),
-                k4a_image_get_stride_bytes(depthimage));
+            //printf(" | Depth16 res:%4dx%4d stride:%5d\n",
+            //    k4a_image_get_height_pixels(depthimage),
+            //   k4a_image_get_width_pixels(depthimage),
+            //  k4a_image_get_stride_bytes(depthimage));
 
             //transform depth image into color coordinates
             if (K4A_RESULT_SUCCEEDED != k4a_transformation_depth_image_to_color_camera(transformation, depthimage, transformed_depth_image))
@@ -327,21 +323,6 @@ int main(int argc, char** argv)
         {
             printf(" | Depth16 None\n");
         }
-
-        
-
-        
-
-        //write the images to disk
-        //uint8_t* color_image_data = k4a_image_get_buffer(depthimage);
-        //size_t image_buffer_size = k4a_image_get_size(depthimage);
-        //const char* file_name = "hello_rgb.jpeg";
-        //fptr = fopen(file_name, "wb");
-        //fwrite((color_image_data), image_buffer_size, 1, fptr);
-        //fclose(fptr);
-        
-        
-
 
         // release capture
         k4a_capture_release(capture);
@@ -373,3 +354,4 @@ Exit:
     return returnCode;
     
 }
+
