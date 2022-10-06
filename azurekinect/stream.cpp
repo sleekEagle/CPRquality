@@ -3,14 +3,15 @@
 #include <stdlib.h>
 #include <k4a/k4a.h>
 #include <iostream>
-#include <opencv2/opencv.hpp>
-#include <opencv2/imgcodecs.hpp>
 #include <k4arecord/record.h>
 #include <signal.h>
 #include <conio.h>
 #include <cstdlib>
+#include <iostream>
+#include <fstream>
+#include <string> 
+#include <inttypes.h>
 
-using namespace cv;
 using namespace std;
 
 volatile sig_atomic_t stop;
@@ -63,6 +64,61 @@ void inthand(int signum) {
     stop = 1;
 }
 
+
+void writefile(const k4a_image_t image, char* filename)
+{
+    ofstream myfile;
+    uint8_t* buffer = k4a_image_get_buffer(image);
+    size_t imgsize = k4a_image_get_size(image);
+    int hpixels = k4a_image_get_height_pixels(image);
+    int wpixels = k4a_image_get_width_pixels(image);
+
+    printf(" |writing image res:%4dx%4d stride:%5d\n",
+        hpixels,
+        wpixels,
+        k4a_image_get_width_pixels(image),
+        k4a_image_get_stride_bytes(image));
+    printf("imgsize = %zu\n", imgsize);
+    int numbits = 0;
+    printf("writing to file %s\n",filename);
+    myfile.open(filename);
+    for (int i = 0;i < imgsize - 1;i += 2) {
+        uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
+        std::string s = std::to_string(val);
+        myfile << s;
+        if (i != (imgsize - 2)) myfile << ",";
+        numbits += 1;
+    }
+    printf("Wrote %d bits\n", numbits);
+    myfile.close();
+}
+
+void print_img_stats(const k4a_image_t image)
+{
+    printf(" | image res:%4dx%4d stride:%5d\n",
+        k4a_image_get_height_pixels(image),
+        k4a_image_get_width_pixels(image),
+        k4a_image_get_stride_bytes(image));
+
+    uint8_t* buffer = k4a_image_get_buffer(image);
+    size_t imgsize = k4a_image_get_size(image);
+    printf("num pixles = %d\n",
+        k4a_image_get_height_pixels(image) * k4a_image_get_width_pixels(image));
+    printf("im size = %zu \n", imgsize);
+
+    uint16_t sum = 0;
+    uint16_t max = 0;
+    for (int i = 0;i < imgsize - 1;i += 2) {
+        uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
+        sum += val;
+        if (val > max) max = val;
+    }
+    double avg = (double)sum / (double)(k4a_image_get_height_pixels(image) * k4a_image_get_width_pixels(image));
+    printf("mean pixel value = %f\n", avg);
+    printf("max pixel value = %d\n", max);
+}
+
+
 int main(int argc, char** argv)
 {
     static const int32_t defaultExposureAuto = -12;
@@ -71,7 +127,7 @@ int main(int argc, char** argv)
     k4a_device_t device = NULL;
     const int32_t TIMEOUT_IN_MS = 1000;
     //-1 : capturing until CTRL+C, otherwise number of frames captured
-    int captureFrameCount= atoi(argv[2]);
+    int captureFrameCount= atoi(argv[3]);
     printf("captureframe count = % d\n",captureFrameCount);
     k4a_capture_t capture = NULL;
     k4a_transformation_t transformation = NULL;
@@ -84,21 +140,6 @@ int main(int argc, char** argv)
     k4a_image_t transformed_depth_image = NULL;
 
     signal(SIGINT, inthand);
-
-    struct BITMAPINFOHEADER
-    {
-        uint32_t biSize = sizeof(BITMAPINFOHEADER);
-        uint32_t biWidth;
-        uint32_t biHeight;
-        uint16_t biPlanes = 1;
-        uint16_t biBitCount;
-        uint32_t biCompression;
-        uint32_t biSizeImage;
-        uint32_t biXPelsPerMeter = 0;
-        uint32_t biYPelsPerMeter = 0;
-        uint32_t biClrUsed = 0;
-        uint32_t biClrImportant = 0;
-    };
 
    
     uint32_t device_count = k4a_device_get_installed_count();
@@ -184,27 +225,6 @@ int main(int argc, char** argv)
             k4a_image_get_width_pixels(transformed_depth_image),
             k4a_image_get_stride_bytes(transformed_depth_image));
 
-        BITMAPINFOHEADER depth_codec_header;
-        depth_codec_header.biWidth = color_width;
-        depth_codec_header.biHeight = color_height;
-        depth_codec_header.biBitCount = 16;
-        depth_codec_header.biCompression = 0x67363162; // b16g
-        depth_codec_header.biSizeImage = sizeof(uint16_t) * color_width * color_height;
-        k4a_record_video_settings_t depth_video_settings;
-        depth_video_settings.width = color_width;
-        depth_video_settings.height = color_height;
-        depth_video_settings.frame_rate = config.camera_fps;
-        if (K4A_RESULT_SUCCEEDED != k4a_record_add_custom_video_track(recording,
-            "TDEPTH",
-            "V_MS/VFW/FOURCC",
-            reinterpret_cast<const uint8_t*>(&depth_codec_header),
-            sizeof(depth_codec_header),
-            &depth_video_settings))
-        {
-            printf("Failed to add custom depth track to video...\n");
-            goto Exit;
-        }
-
     }
     else
     {
@@ -239,6 +259,7 @@ int main(int argc, char** argv)
     printf("Streraming images...\n");
 
     char c;
+    uint64_t depthts;
     while ((!stop) && (captureFrameCount == -1)||(captureFrameCount-- > 0))
     {
         k4a_image_t colorimage;
@@ -263,9 +284,6 @@ int main(int argc, char** argv)
             printf("Failed to write to record \n");
             goto Exit;
         }
-
-        //k4a_record_write_capture(recording, capture);
-        //k4a_capture_release(capture);
 
         //getting IMU sample
         k4a_imu_sample_t sample;
@@ -300,6 +318,7 @@ int main(int argc, char** argv)
         
         // Probe for a depth16 image
         depthimage = k4a_capture_get_depth_image(capture);
+
         if (depthimage != NULL)
         {
             //printf(" | Depth16 res:%4dx%4d stride:%5d\n",
@@ -313,16 +332,24 @@ int main(int argc, char** argv)
                 printf("Failed to transform depth image to color camera\n");
                 goto Exit;
             }
-            if (K4A_RESULT_SUCCEEDED != k4a_record_write_custom_track_data(recording,
-                "TDEPTH",
-                k4a_image_get_device_timestamp_usec(depthimage),
-                k4a_image_get_buffer(transformed_depth_image),
-                k4a_image_get_size(transformed_depth_image)))
-            {
-                printf("Failed to write custom depth track to record...\n");
-                goto Exit;
-            }
-            ;
+            //write transformed depth image to disk
+
+            depthts = k4a_image_get_device_timestamp_usec(depthimage);
+            printf("depth ts ");
+            printf("%" PRId64 "\n", depthts);
+            char depthts_s[21];
+            sprintf(depthts_s, "%" PRIu64, depthts);
+            //additional 4 bytes for .png
+            char* filename = (char*)malloc(strlen(argv[2]) + strlen(depthts_s)+4);
+            strcpy(filename,argv[2]);
+            filename += strlen(argv[2]);
+            strcpy(filename,depthts_s);
+            filename += strlen(depthts_s);
+            strcpy(filename,".png");
+            filename -= (strlen(argv[2])+strlen(depthts_s));
+            printf("before writing to file %s\n", filename);
+            writefile(transformed_depth_image,filename);
+            
             k4a_image_release(depthimage);
         }
         else
