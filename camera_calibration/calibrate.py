@@ -142,6 +142,15 @@ def stereo_calibrate(mtx1, dist1, mtx2, dist2, frames_folder):
  
 mtx1, dist1 = calibrate_camera(images_folder = 'C:\\Users\\lahir\\Downloads\\frames\\D2\\*')
 mtx2, dist2 = calibrate_camera(images_folder = 'C:\\Users\\lahir\\Downloads\\frames\\J2\\*')
-
 R, T = stereo_calibrate(mtx1, dist1, mtx2, dist2, 'C:\\Users\\lahir\\Downloads\\frames\\synched\\*')
+
+
+
+
+
+
+
+
+
+
 
