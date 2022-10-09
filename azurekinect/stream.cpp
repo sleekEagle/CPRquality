@@ -11,8 +11,14 @@
 #include <fstream>
 #include <string> 
 #include <inttypes.h>
+#include <chrono>
+#include <vector>
+#include <sstream>
+
+
 
 using namespace std;
+using namespace std::chrono;
 
 volatile sig_atomic_t stop;
 
@@ -65,60 +71,6 @@ void inthand(int signum) {
 }
 
 
-void writefile(const k4a_image_t image, char* filename)
-{
-    ofstream myfile;
-    uint8_t* buffer = k4a_image_get_buffer(image);
-    size_t imgsize = k4a_image_get_size(image);
-    int hpixels = k4a_image_get_height_pixels(image);
-    int wpixels = k4a_image_get_width_pixels(image);
-
-    printf(" |writing image res:%4dx%4d stride:%5d\n",
-        hpixels,
-        wpixels,
-        k4a_image_get_width_pixels(image),
-        k4a_image_get_stride_bytes(image));
-    printf("imgsize = %zu\n", imgsize);
-    int numbits = 0;
-    printf("writing to file %s\n",filename);
-    myfile.open(filename);
-    for (int i = 0;i < imgsize - 1;i += 2) {
-        uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
-        std::string s = std::to_string(val);
-        myfile << s;
-        if (i != (imgsize - 2)) myfile << ",";
-        numbits += 1;
-    }
-    printf("Wrote %d bits\n", numbits);
-    myfile.close();
-}
-
-void print_img_stats(const k4a_image_t image)
-{
-    printf(" | image res:%4dx%4d stride:%5d\n",
-        k4a_image_get_height_pixels(image),
-        k4a_image_get_width_pixels(image),
-        k4a_image_get_stride_bytes(image));
-
-    uint8_t* buffer = k4a_image_get_buffer(image);
-    size_t imgsize = k4a_image_get_size(image);
-    printf("num pixles = %d\n",
-        k4a_image_get_height_pixels(image) * k4a_image_get_width_pixels(image));
-    printf("im size = %zu \n", imgsize);
-
-    uint16_t sum = 0;
-    uint16_t max = 0;
-    for (int i = 0;i < imgsize - 1;i += 2) {
-        uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
-        sum += val;
-        if (val > max) max = val;
-    }
-    double avg = (double)sum / (double)(k4a_image_get_height_pixels(image) * k4a_image_get_width_pixels(image));
-    printf("mean pixel value = %f\n", avg);
-    printf("max pixel value = %d\n", max);
-}
-
-
 int main(int argc, char** argv)
 {
     static const int32_t defaultExposureAuto = -12;
@@ -130,18 +82,18 @@ int main(int argc, char** argv)
     int captureFrameCount= atoi(argv[3]);
     printf("captureframe count = % d\n",captureFrameCount);
     k4a_capture_t capture = NULL;
-    k4a_transformation_t transformation = NULL;
     FILE* fptr;
+    ofstream tsfile;
+    string tsfilename = "ts.txt";
+    char* filename;
     int absoluteExposureValue = defaultExposureAuto;
     int gain = defaultGainAuto;
     bool firstphoto = false;
 
     uint32_t color_width, color_height;
-    k4a_image_t transformed_depth_image = NULL;
 
     signal(SIGINT, inthand);
 
-   
     uint32_t device_count = k4a_device_get_installed_count();
 
     if (argc < 2) {
@@ -172,15 +124,6 @@ int main(int argc, char** argv)
     config.synchronized_images_only = true;
     
 
-    k4a_calibration_t calibration;
-    if (K4A_RESULT_SUCCEEDED !=
-        k4a_device_get_calibration(device, config.depth_mode, config.color_resolution, &calibration))
-    {
-        printf("Failed to get calibration\n");
-        goto Exit;
-    }
-    transformation = k4a_transformation_create(&calibration);
-
     if (K4A_RESULT_SUCCEEDED != k4a_device_start_cameras(device, &config))
     {
         printf("Failed to start device\n");
@@ -209,29 +152,7 @@ int main(int argc, char** argv)
     }
 
     k4a_convert_resolution_to_width_height(config.color_resolution, &color_width, &color_height);
-    if (K4A_RESULT_SUCCEEDED != k4a_image_create(K4A_IMAGE_FORMAT_DEPTH16,
-        color_width,
-        color_height,
-        color_width * 2,
-        &transformed_depth_image))
-    {
-        printf("Failed to create transformed color image\n");
-        return false;
-    }
-    if (transformed_depth_image)
-    {
-        printf(" | Transformed color res:%4dx%4d stride:%5d ",
-            k4a_image_get_height_pixels(transformed_depth_image),
-            k4a_image_get_width_pixels(transformed_depth_image),
-            k4a_image_get_stride_bytes(transformed_depth_image));
 
-    }
-    else
-    {
-        printf(" | Transformed color None                       ");
-    }
-
-    
     if (K4A_RESULT_SUCCEEDED != k4a_record_write_header(recording))
     {
         printf("Failed to write header \n");
@@ -260,10 +181,19 @@ int main(int argc, char** argv)
 
     char c;
     uint64_t depthts;
+
+    //open file to write ts
+    filename = (char*)malloc(strlen(argv[2]) + strlen(tsfilename.c_str()));
+    strcpy(filename, argv[2]);
+    filename += strlen(argv[2]);
+    strcpy(filename, tsfilename.c_str());
+    filename += strlen(tsfilename.c_str());
+    filename -= (strlen(argv[2]) + strlen(tsfilename.c_str()));
+    printf("Openning ts file:  %s\n", filename);
+    tsfile.open(filename);
+
     while ((!stop) && (captureFrameCount == -1)||(captureFrameCount-- > 0))
     {
-        k4a_image_t colorimage;
-        k4a_image_t depthimage;
 
 
         switch (k4a_device_get_capture(device, &capture, TIMEOUT_IN_MS))
@@ -278,6 +208,14 @@ int main(int argc, char** argv)
             printf("Failed to read a capture\n");
             goto Exit;
         }
+        char capturets_s[21];
+        uint64_t ts = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+        sprintf(capturets_s, "%" PRIu64, ts);
+
+        //write ts to file
+        
+        tsfile << capturets_s<<"\n";
+
 
         if (K4A_RESULT_SUCCEEDED != k4a_record_write_capture(recording, capture))
         {
@@ -297,73 +235,20 @@ int main(int argc, char** argv)
             printf("Failed to write IMU sample to record\n");
             goto Exit;
         }
+       
         
+      
+        milliseconds ms = duration_cast<milliseconds>(
+            system_clock::now().time_since_epoch()
+            );
 
-        /*
-        // Probe for a color image
-        colorimage = k4a_capture_get_color_image(capture);
-        if (colorimage)
-        {
-            printf(" | Color res:%4dx%4d stride:%5d ",
-                k4a_image_get_height_pixels(colorimage),
-                k4a_image_get_width_pixels(colorimage),
-                k4a_image_get_stride_bytes(colorimage));
-            k4a_image_release(colorimage);
-        }
-        else
-        {
-            printf(" | Color None                       ");
-        }
-        */  
-        
-        // Probe for a depth16 image
-        depthimage = k4a_capture_get_depth_image(capture);
-
-        if (depthimage != NULL)
-        {
-            //printf(" | Depth16 res:%4dx%4d stride:%5d\n",
-            //    k4a_image_get_height_pixels(depthimage),
-            //   k4a_image_get_width_pixels(depthimage),
-            //  k4a_image_get_stride_bytes(depthimage));
-
-            //transform depth image into color coordinates
-            if (K4A_RESULT_SUCCEEDED != k4a_transformation_depth_image_to_color_camera(transformation, depthimage, transformed_depth_image))
-            {
-                printf("Failed to transform depth image to color camera\n");
-                goto Exit;
-            }
-            //write transformed depth image to disk
-
-            depthts = k4a_image_get_device_timestamp_usec(depthimage);
-            printf("depth ts ");
-            printf("%" PRId64 "\n", depthts);
-            char depthts_s[21];
-            sprintf(depthts_s, "%" PRIu64, depthts);
-            //additional 4 bytes for .png
-            char* filename = (char*)malloc(strlen(argv[2]) + strlen(depthts_s)+4);
-            strcpy(filename,argv[2]);
-            filename += strlen(argv[2]);
-            strcpy(filename,depthts_s);
-            filename += strlen(depthts_s);
-            strcpy(filename,".png");
-            filename -= (strlen(argv[2])+strlen(depthts_s));
-            printf("before writing to file %s\n", filename);
-            writefile(transformed_depth_image,filename);
-            
-            k4a_image_release(depthimage);
-        }
-        else
-        {
-            printf(" | Depth16 None\n");
-        }
-
+       
         // release capture
         k4a_capture_release(capture);
         fflush(stdout);
     }
 
     //stopping IMU and cameras
-    k4a_image_release(transformed_depth_image);
     k4a_device_stop_cameras(device);
     k4a_device_stop_imu(device);
 
@@ -382,6 +267,10 @@ Exit:
     if (device != NULL)
     {
         k4a_device_close(device);
+    }
+    if (tsfile) 
+    {
+        tsfile.close();
     }
 
     return returnCode;
