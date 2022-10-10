@@ -3,17 +3,20 @@
 ### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 30 frames at 30 frames per second)
 Goto stream directory
 ```
- .\stream.exeout_path required_fps
- .\stream.exe C:\\path\\to\\output\\file.mkv 30
+ .\stream.exe out_path_of_video out_path_for_ts_file required_fps
+ .\stream.exe C:\\Users\\lahir\\CPRdata\\vid.mkv C:\\Users\\lahir\\CPRdata\\ 300
  ```
  required_fps : [30,15,5]\
  required_fps=-1 : capture till CTRL+C\
- We can use Azure Kinect Viewer to view the file. Regular video players will not work. \
- Azure Kinect Viewer : https://learn.microsoft.com/en-us/azure/kinect-dk/azure-kinect-viewer
+ We can use Azure Kinect Viewer to view the video .mkvfile. Regular video players will not work. \
+ Azure Kinect Viewer : https://learn.microsoft.com/en-us/azure/kinect-dk/azure-kinect-viewer \
+ outputs : \
+ 1. vid.mkv with the rgb,depth and IMU tracks \
+ 2. ts.txt file with computer timestamps of each capture 
 
-### Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 40 frames at 30 frames per second)
+### E.g. Save data (RGB,depth and IMU) from Azure Kinect to computer (to capture 40 frames at 30 frames per second)
 ```
- .\azurekinect.exe C:\\path\\to\\output\\file.mkv 40
+ .\stream.exe C:\\path\\to\\output\\file.mkv C:\\path\\to\\output\\ 40
 ```
  
  ### View metadata of the .mkv file with ffmpeg (you need ffmpeg installed in your system)
@@ -42,12 +45,17 @@ Goto stream directory
  Execute this ffmpeg command twice; once to get RGB images, once to get depth images.
  
  ### Extract IMU data
- Goto reader directory 
+ Goto IMUreader directory 
  ```
-  .\reader.exe C:\\output\\dir\\to\\acc_and_gyro\\csv_files\\  C:\\path\\to\\output\\file.mkv
+.\IMUreader.exe C:\\Users\\lahir\\CPRdata\\ C:\\Users\\lahir\\CPRdata\\vid.mkv
  ```
+ outputs : \
+ acc.csv , gyro.csv files with IMU data created in the same directory as the video file \
  Format of the csv created : \
  timestamp of the IMU,x,y,z 
+
+ ### Extract the depth images transformed to the RGB coordinate system
+  
  
  
  

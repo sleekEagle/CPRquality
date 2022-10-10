@@ -55,7 +55,7 @@ static bool k4a_convert_resolution_to_width_height(k4a_color_resolution_t resolu
 }
 
 
-void writefile(const k4a_image_t image, char* filename)
+int writefile(const k4a_image_t image, char* filename)
 {
     ofstream myfile;
     uint8_t* buffer = k4a_image_get_buffer(image);
@@ -72,18 +72,29 @@ void writefile(const k4a_image_t image, char* filename)
     int numbits = 0;
     printf("writing to file %s\n", filename);
     myfile.open(filename);
-    for (int i = 0;i < imgsize - 1;i += 2) {
-        //uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
-        uint16_t val = buffer[i] + (buffer[i + 1] << 8);
-        char str[80];
-        int str_len = sprintf(str, "%d", val);
-        //printf("int : %u string %s\n",val,str);
-        myfile << str;
-        if (i != (imgsize - 2)) myfile << ",";
-        numbits += 1;
+    if (!myfile) {
+        printf("Exception opening file\n");
+        return -1;
+    }
+    try {
+        for (int i = 0;i < imgsize - 1;i += 2) {
+            //uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
+            uint16_t val = buffer[i] + (buffer[i + 1] << 8);
+            char str[80];
+            int str_len = sprintf(str, "%d", val);
+            //printf("int : %u string %s\n",val,str);
+            myfile << str;
+            if (i != (imgsize - 2)) myfile << ",";
+            numbits += 1;
+        }
+    }
+    catch (ios_base::failure) {
+        printf("Exception writing to file\n");
+        return -1;
     }
     printf("Wrote %d bytes\n", numbits);
     myfile.close();
+    return 0;
 }
 
 void print_img_stats(const k4a_image_t image)
@@ -223,13 +234,14 @@ int main(int argc, char** argv)
         result = k4a_playback_get_next_capture(playback_handle, &capture);
         if (result == K4A_STREAM_RESULT_SUCCEEDED)
         {
+            
             // Process capture here
 
             // Probe for color image
             colorimage = k4a_capture_get_color_image(capture);
             // Probe for a depth16 image
             depthimage = k4a_capture_get_depth_image(capture);
-
+            
             //transform depth image into color coordinates
             if (K4A_RESULT_SUCCEEDED != k4a_transformation_depth_image_to_color_camera(transformation, depthimage, transformed_depth_image))
             {
@@ -244,8 +256,13 @@ int main(int argc, char** argv)
                 printf("Failed to compute point cloud\n");
                 goto Exit;
             }
+            printf("i=%d\n", n_capture);
+
+            
             n_capture_s = std::to_string(n_capture);
+            
             char* filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
+            
             strcpy(filename, argv[2]);
             filename += strlen(argv[2]);
             strcpy(filename, n_capture_s.c_str());
@@ -254,8 +271,10 @@ int main(int argc, char** argv)
             filename -= (strlen(argv[2]) + strlen(n_capture_s.c_str()));
             printf("before writing to file %s\n", filename);
             writefile(transformed_depth_image, filename);
-
+            printf("i=%d\n", n_capture);
+            
             //write pt cloud to file
+            
             filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
             strcpy(filename, argv[2]);
             filename += strlen(argv[2]);
@@ -265,8 +284,10 @@ int main(int argc, char** argv)
             filename -= (strlen(argv[2]) + strlen(n_capture_s.c_str()));
             printf("before writing to file pt cloud %s\n", filename);
             writefile(point_cloud_image, filename);
+            
 
             k4a_capture_release(capture);
+            
             n_capture++;
         }
         else if (result == K4A_STREAM_RESULT_EOF)
