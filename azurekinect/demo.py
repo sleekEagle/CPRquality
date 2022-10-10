@@ -1,4 +1,5 @@
 import azurekinect.read_azure_img as azureimg
+import azurekinect.read_azure_imu as azureimu
 import os
 import cv2
 import mediapipe as mp
@@ -50,12 +51,12 @@ with mp_hands.Hands(
 from matplotlib import pyplot as plt
 transformed_shape=(720,1280)   
 
-wrist_coords_xyz=[]
+wrist_coords_xyz=np.empty([0, 3])
+valid_ind=[]
 ptcpasth="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\"
 WRISTWINDOW=10
 for i,wrist in enumerate(wrist_coords):
     if(not(len(wrist)==2)):
-        wrist_coords_xyz.append(())
         continue
     else:
         ptcfile=ptcpasth+str(i)+".ptc"
@@ -64,22 +65,20 @@ for i,wrist in enumerate(wrist_coords):
         wrist_y=y.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         wrist_z=z.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         if(abs(wrist_x)>1 and abs(wrist_x)<10000 and abs(wrist_y)>1 and abs(wrist_y)<10000 and abs(wrist_z)>1 and abs(wrist_z)<10000):
-            wrist_coords_xyz.append((wrist_x,wrist_y,wrist_z))
-        else:
-            wrist_coords_xyz.append(())
+            wrist_coords_xyz=np.concatenate((wrist_coords_xyz,np.array([[wrist_x,wrist_y,wrist_z]])),axis=0)
+            valid_ind.append(i)
         print(ptcfile)
 
+#get gravity direction (what vector is down ?)
+accfile=r"C:\\Users\\lahir\\CPRdata\\acc.csv"
+ts,gravity=azureimu.get_gravity(accfile)
+#get gravity wrt rgb camera coordinate frame
+gravity=azureimu.transform_acc_to_RGB(gravity)
+#lets assume azure kinect was still the whole time. So we can simply get the mean direction of gravity
+gravity=np.mean(gravity,axis=0)
 
 
-file="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\0.trn"
-img=azureimg.read_csv_data(file)
-img=img.reshape(transformed_shape)
-plt.imshow(img, interpolation='nearest')
-plt.show()
 
-
-x,y,z=azureimg.read_ptc(file)
-wrist=x.reshape(transformed_shape)
 
 
 

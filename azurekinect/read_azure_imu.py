@@ -1,7 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt 
 
-file=r"C:\\Users\\lahir\\CPRdata\\acc.csv"
 def getIMUdata(file):
     data=np.empty([0,4])
     with open(file, "r") as filestream:
