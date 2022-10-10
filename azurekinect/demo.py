@@ -76,6 +76,12 @@ ts,gravity=azureimu.get_gravity(accfile)
 gravity=azureimu.transform_acc_to_RGB(gravity)
 #lets assume azure kinect was still the whole time. So we can simply get the mean direction of gravity
 gravity=np.mean(gravity,axis=0)
+projections=[]
+for i in range(wrist_coords_xyz.shape[0]):
+    projections.append(np.dot(wrist_coords_xyz[i,:],gravity))
+
+plt.plot(projections)
+plt.show()
 
 
 
