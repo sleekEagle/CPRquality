@@ -38,6 +38,10 @@ Goto stream directory
  ```
  ffmpeg -skip_frame nokey -i .\vid.mkv -map 0:1 -vsync 0 -frame_pts true -r 10000 outputs/"originald%d.png"
  ```
+ To get images named in a sequence :
+ ```
+ ffmpeg -i .\vid.mkv -map 0:0 -vsync 0 outputs/%4d.png
+ ```
  Here -map 0:1 is the stream number (0:1) \
  image files are named originald$timestamp_offset$.png\
  the directory output must be present. Otherwise there will be an error thrown.\
@@ -55,7 +59,7 @@ Goto stream directory
  timestamp of the IMU,x,y,z 
 
  ### Extract the depth images transformed to the RGB coordinate system
-  
+
  
  
  

@@ -11,6 +11,7 @@ mp_hands = mp.solutions.hands
 #read rgb images from a directory
 rgbpath="C:\\Users\\lahir\\CPRdata\\outputs\\"
 dir_list = os.listdir(rgbpath)
+dir_list.sort()
 imgs=[rgbpath+file for file in dir_list if (file.split('.')[-1]=='png')]
 
 wrist_coords=[]
@@ -21,7 +22,7 @@ with mp_hands.Hands(
   for idx, file in enumerate(imgs):
     # Read an image, flip it around y-axis for correct handedness output (see
     # above).
-    image = cv2.flip(cv2.imread(file), 1)
+    image = cv2.imread(file)
     image_height, image_width, _ = image.shape
     # Convert the BGR image to RGB before processing.
     results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
@@ -51,7 +52,7 @@ transformed_shape=(720,1280)
 
 wrist_coords_xyz=[]
 ptcpasth="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\"
-WRISTWINDOW=5
+WRISTWINDOW=10
 for i,wrist in enumerate(wrist_coords):
     if(not(len(wrist)==2)):
         wrist_coords_xyz.append(())
@@ -62,15 +63,24 @@ for i,wrist in enumerate(wrist_coords):
         wrist_x=x.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         wrist_y=y.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         wrist_z=z.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
-        wrist_coords_xyz.append((wrist_x,wrist_y,wrist_z))
+        if(abs(wrist_x)>1 and abs(wrist_x)<10000 and abs(wrist_y)>1 and abs(wrist_y)<10000 and abs(wrist_z)>1 and abs(wrist_z)<10000):
+            wrist_coords_xyz.append((wrist_x,wrist_y,wrist_z))
+        else:
+            wrist_coords_xyz.append(())
         print(ptcfile)
 
-file="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\0.ptc"
+
+
+file="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\0.trn"
+img=azureimg.read_csv_data(file)
+img=img.reshape(transformed_shape)
+plt.imshow(img, interpolation='nearest')
+plt.show()
+
+
 x,y,z=azureimg.read_ptc(file)
 wrist=x.reshape(transformed_shape)
 
-plt.imshow(img_x, interpolation='nearest')
-plt.show()
 
 
 
