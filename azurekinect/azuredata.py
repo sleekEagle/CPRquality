@@ -29,15 +29,4 @@ img_=read_csv_data(file)
 depth=np.reshape(img_,transformed_shape)
 ptcfile=r"C:\\Users\\lahir\\CPRdata\\0.ptc"
 
-
-
-
-
-
-
-
-
-
-
-
 plt.imsave("C:\\Users\\lahir\\CPRdata\\ddddddepth.png", depth, cmap='gray')

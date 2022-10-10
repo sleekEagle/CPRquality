@@ -55,4 +55,3 @@ gravity_acc=get_gravity(file)[1]
 gravity_rgb=transform_acc_to_RGB(gravity_acc)
 
 
-
