@@ -25,6 +25,12 @@ dir_list = os.listdir(rgbpath)
 dir_list.sort()
 imgs=[rgbpath+file for file in dir_list if (file.split('.')[-1]=='png')]
 
+#open video file to write
+image = cv2.imread(imgs[0])
+image_height, image_width, _ = image.shape
+fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
+video = cv2.VideoWriter('C:\\Users\\lahir\\CPRdata\\outputs\\annotated\\vid.avi', fourcc, 30, (image_width, image_height))
+
 wrist_coords=[]
 with mp_hands.Hands(
     static_image_mode=True,
@@ -56,6 +62,7 @@ with mp_hands.Hands(
         label = "({0},{1})".format(relative_x, relative_y)
         annoimg=cv2.putText(image,label, (relative_x+30,relative_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0),2)
         cv2.imwrite('C:\\Users\\lahir\\CPRdata\\outputs\\annotated\\' + str(idx) + '.png', annoimg)
+        video.write(annoimg)
 
 
 from matplotlib import pyplot as plt
@@ -94,6 +101,8 @@ for i in range(wrist_coords_xyz.shape[0]):
 
 plt.plot(projections)
 plt.title('Wrist position perpendicular to the floor in mm')
+plt.xlabel('frame number')
+plt.savefig('C:\\Users\\lahir\\CPRdata\\outputs\\wristpos.png')
 plt.show()
 
 
