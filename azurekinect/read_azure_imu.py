@@ -49,8 +49,3 @@ def transform_acc_to_RGB(data):
     data_new[:,1]=data[:,2]
     data_new[:,2]=-data[:,0]
     return data_new
-
-gravity_acc=get_gravity(file)[1]
-gravity_rgb=transform_acc_to_RGB(gravity_acc)
-
-

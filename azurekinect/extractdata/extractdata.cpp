@@ -90,10 +90,15 @@ int writefile(const k4a_image_t image, char* filename)
     }
     catch (ios_base::failure) {
         printf("Exception writing to file\n");
+        if (myfile) {
+            myfile.close();
+        }
         return -1;
     }
     printf("Wrote %d bytes\n", numbits);
-    myfile.close();
+    if (myfile) {
+        myfile.close();
+    }
     return 0;
 }
 
@@ -137,8 +142,8 @@ int main(int argc, char** argv)
 
     k4a_image_t transformed_depth_image = NULL;
     k4a_image_t point_cloud_image = NULL;
-    k4a_image_t colorimage;
-    k4a_image_t depthimage;
+    k4a_image_t colorimage=NULL;
+    k4a_image_t depthimage=NULL;
 
     std::string n_capture_s;
     int n_capture = 0;
@@ -262,7 +267,7 @@ int main(int argc, char** argv)
             n_capture_s = std::to_string(n_capture);
             
             char* filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
-            
+            /*
             strcpy(filename, argv[2]);
             filename += strlen(argv[2]);
             strcpy(filename, n_capture_s.c_str());
@@ -272,7 +277,8 @@ int main(int argc, char** argv)
             printf("before writing to file %s\n", filename);
             writefile(transformed_depth_image, filename);
             printf("i=%d\n", n_capture);
-            
+            */
+
             //write pt cloud to file
             
             filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
@@ -284,7 +290,6 @@ int main(int argc, char** argv)
             filename -= (strlen(argv[2]) + strlen(n_capture_s.c_str()));
             printf("before writing to file pt cloud %s\n", filename);
             writefile(point_cloud_image, filename);
-            
 
             k4a_capture_release(capture);
             
@@ -303,6 +308,9 @@ int main(int argc, char** argv)
     }
 
     k4a_image_release(transformed_depth_image);
+    if(colorimage!=NULL) k4a_image_release(colorimage);
+    if(depthimage!=NULL) k4a_image_release(depthimage);
+    if(point_cloud_image!=NULL) k4a_image_release(point_cloud_image);
 
 
 

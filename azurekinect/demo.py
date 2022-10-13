@@ -1,9 +1,19 @@
+import os
+import sys
+
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+
 import azurekinect.read_azure_img as azureimg
 import azurekinect.read_azure_imu as azureimu
-import os
 import cv2
 import mediapipe as mp
 import numpy as np
+import subprocess
+
+#extract images
+out = subprocess.run('ffmpeg -i C:\\Users\\lahir\\CPRdata\\vid.mkv -map 0:0  -vsync 0 C:\\Users\\lahir\\CPRdata\\outputs\\rgb%04d.png', shell=True)
 
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
@@ -54,7 +64,7 @@ transformed_shape=(720,1280)
 wrist_coords_xyz=np.empty([0, 3])
 valid_ind=[]
 ptcpasth="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\"
-WRISTWINDOW=10
+WRISTWINDOW=5
 for i,wrist in enumerate(wrist_coords):
     if(not(len(wrist)==2)):
         continue
@@ -64,6 +74,7 @@ for i,wrist in enumerate(wrist_coords):
         wrist_x=x.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         wrist_y=y.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         wrist_z=z.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
+        #print(wrist_x,wrist_y,wrist_z)
         if(abs(wrist_x)>1 and abs(wrist_x)<10000 and abs(wrist_y)>1 and abs(wrist_y)<10000 and abs(wrist_z)>1 and abs(wrist_z)<10000):
             wrist_coords_xyz=np.concatenate((wrist_coords_xyz,np.array([[wrist_x,wrist_y,wrist_z]])),axis=0)
             valid_ind.append(i)
@@ -82,6 +93,7 @@ for i in range(wrist_coords_xyz.shape[0]):
 
 plt.plot(projections)
 plt.show()
+
 
 
 
