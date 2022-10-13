@@ -84,9 +84,13 @@ int writefile(const k4a_image_t image, char* filename)
             int str_len = sprintf(str, "%d", val);
             //printf("int : %u string %s\n",val,str);
             myfile << str;
-            if (i != (imgsize - 2)) myfile << ",";
+                if (i != (imgsize - 2)) 
+                {
+                    myfile << ",";
+                } 
             numbits += 1;
         }
+        
     }
     catch (ios_base::failure) {
         printf("Exception writing to file\n");
@@ -145,8 +149,8 @@ int main(int argc, char** argv)
     k4a_image_t colorimage=NULL;
     k4a_image_t depthimage=NULL;
 
-    std::string n_capture_s;
     int n_capture = 0;
+    char* filename = (char*)malloc(strlen(argv[2]) + 3 + 4);
 
 
     //define transformations
@@ -264,9 +268,9 @@ int main(int argc, char** argv)
             printf("i=%d\n", n_capture);
 
             
-            n_capture_s = std::to_string(n_capture);
+            //n_capture_s = std::to_string(n_capture);
             
-            char* filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
+            
             /*
             strcpy(filename, argv[2]);
             filename += strlen(argv[2]);
@@ -278,17 +282,21 @@ int main(int argc, char** argv)
             writefile(transformed_depth_image, filename);
             printf("i=%d\n", n_capture);
             */
+            std::ostringstream n_capture_s;
+            n_capture_s << std::setw(3) << std::setfill('0') << n_capture;
+            printf("ncapture= %d\n",n_capture);
+            printf("ncapture_s= %s\n", n_capture_s.str());
 
             //write pt cloud to file
-            
-            filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
+            //filename = (char*)malloc(strlen(argv[2]) + strlen(n_capture_s.c_str()) + 4);
             strcpy(filename, argv[2]);
             filename += strlen(argv[2]);
-            strcpy(filename, n_capture_s.c_str());
-            filename += strlen(n_capture_s.c_str());
+            strcpy(filename, n_capture_s.str().c_str());
+            filename += strlen(n_capture_s.str().c_str());
             strcpy(filename, ".ptc");
-            filename -= (strlen(argv[2]) + strlen(n_capture_s.c_str()));
+            filename -= (strlen(argv[2]) + strlen(n_capture_s.str().c_str()));
             printf("before writing to file pt cloud %s\n", filename);
+            
             writefile(point_cloud_image, filename);
 
             k4a_capture_release(capture);

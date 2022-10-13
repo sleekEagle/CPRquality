@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt 
+file=r"C:\\Users\\lahir\\CPRdata\\acc.csv"
 
 def getIMUdata(file):
     data=np.empty([0,4])
@@ -37,9 +38,9 @@ def get_gravity(file):
     #filter with a window of 30 samples (1 seconds at 30fps)
     imu_filt=np.apply_along_axis(moving_average,axis=0,arr=imudata,w=30)
     GRAVITY=-9.8
-    gravity_=imu_filt[:,1:]/GRAVITY
+    gravity=imu_filt[:,1:]/GRAVITY
     #normalize
-    gravity=gravity_/np.expand_dims(gravity_.sum(axis=1),axis=1)
+    #gravity=gravity_/np.expand_dims(gravity_.sum(axis=1),axis=1)
     return imu_filt[:,0],gravity
 
 #transform between acc and RGB coordinste systems given xyz vectors of shape (n,3)

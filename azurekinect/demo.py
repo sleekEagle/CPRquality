@@ -69,7 +69,7 @@ for i,wrist in enumerate(wrist_coords):
     if(not(len(wrist)==2)):
         continue
     else:
-        ptcfile=ptcpasth+str(i)+".ptc"
+        ptcfile=ptcpasth+str(i).zfill(3)+".ptc"
         x,y,z=azureimg.read_ptc(ptcfile)
         wrist_x=x.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
         wrist_y=y.reshape(transformed_shape)[wrist[1]-WRISTWINDOW:wrist[1]+WRISTWINDOW,wrist[0]-WRISTWINDOW:wrist[0]+WRISTWINDOW].mean()
@@ -87,11 +87,13 @@ ts,gravity=azureimu.get_gravity(accfile)
 gravity=azureimu.transform_acc_to_RGB(gravity)
 #lets assume azure kinect was still the whole time. So we can simply get the mean direction of gravity
 gravity=np.mean(gravity,axis=0)
+gravity=gravity/np.sum(gravity)
 projections=[]
 for i in range(wrist_coords_xyz.shape[0]):
     projections.append(np.dot(wrist_coords_xyz[i,:],gravity))
 
 plt.plot(projections)
+plt.title('Wrist position perpendicular to the floor in mm')
 plt.show()
 
 
