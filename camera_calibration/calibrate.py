@@ -72,17 +72,19 @@ def calibrate_camera(images_folder):
  
     return mtx, dist
 
-frames_folder='C:\\Users\\lahir\\Downloads\\frames\\synched\\*'
-def stereo_calibrate(mtx1, dist1, mtx2, dist2, frames_folder):
+cam1dir='C:\\Users\\lahir\\Downloads\\frames\\D2\\*'
+cam2dir='C:\\Users\\lahir\\Downloads\\frames\\J2\\*'
+
+def stereo_calibrate(mtx1, dist1, mtx2, dist2, cam1dir,cam2dir):
     #read the synched frames
-    images_names = glob.glob(frames_folder)
-    images_names = sorted(images_names)
-    c1_images_names = images_names[:len(images_names)//2]
-    c2_images_names = images_names[len(images_names)//2:]
+    cam1_images_names = glob.glob(cam1dir)
+    cam2_images_names = glob.glob(cam2dir)
+    cam1_images_names = sorted(cam1_images_names)
+    cam2_images_names = sorted(cam2_images_names)
  
     c1_images = []
     c2_images = []
-    for im1, im2 in zip(c1_images_names, c2_images_names):
+    for im1, im2 in zip(cam1_images_names, cam2_images_names):
         _im = cv.imread(im1, 1)
         c1_images.append(_im)
  
@@ -142,15 +144,5 @@ def stereo_calibrate(mtx1, dist1, mtx2, dist2, frames_folder):
  
 mtx1, dist1 = calibrate_camera(images_folder = 'C:\\Users\\lahir\\Downloads\\frames\\D2\\*')
 mtx2, dist2 = calibrate_camera(images_folder = 'C:\\Users\\lahir\\Downloads\\frames\\J2\\*')
-R, T = stereo_calibrate(mtx1, dist1, mtx2, dist2, 'C:\\Users\\lahir\\Downloads\\frames\\synched\\*')
-
-
-
-
-
-
-
-
-
-
+R, T = stereo_calibrate(mtx1, dist1, mtx2, dist2, 'C:\\Users\\lahir\\Downloads\\frames\\D2\\*','C:\\Users\\lahir\\Downloads\\frames\\J2\\*')
 
