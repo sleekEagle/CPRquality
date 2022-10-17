@@ -10,8 +10,9 @@ import glob
 import numpy as np
 from numpy import savetxt
 
-rows = 6 #number of checkerboard rows.
-columns = 9 #number of checkerboard columns.
+rows = 7 #number of checkerboard rows.
+columns = 4 #number of checkerboard columns.
+world_scaling = 9. #change this to the real world square size. Or not.
 
 
 def calibrate_camera(images_folder):
@@ -24,7 +25,6 @@ def calibrate_camera(images_folder):
     #criteria used by checkerboard pattern detector.
     #Change this if the code can't find the checkerboard
     criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-    world_scaling = 1. #change this to the real world square size. Or not.
  
     #coordinates of squares in the checkerboard world space
     objp = np.zeros((rows*columns,3), np.float32)
@@ -149,5 +149,4 @@ savetxt(dirpath+'kinect_calib.csv', mtx2, delimiter=',')
 savetxt(dirpath+'kinect_dist.csv', dist2, delimiter=',')
 savetxt(dirpath+'phonetoazure_R.csv', R, delimiter=',')
 savetxt(dirpath+'phonetoazure_T.csv', T, delimiter=',')
-
 
