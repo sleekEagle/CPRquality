@@ -79,7 +79,7 @@ int writefile(const k4a_image_t image, char* filename)
     try {
         for (int i = 0;i < imgsize - 1;i += 2) {
             //uint16_t val = ((uint16_t)buffer[i] << 8) | buffer[i + 1];
-            uint16_t val = buffer[i] + (buffer[i + 1] << 8);
+            int16_t val = buffer[i] + (buffer[i + 1] << 8);
             char str[80];
             int str_len = sprintf(str, "%d", val);
             //printf("int : %u string %s\n",val,str);
@@ -298,6 +298,16 @@ int main(int argc, char** argv)
             printf("before writing to file pt cloud %s\n", filename);
             
             writefile(point_cloud_image, filename);
+
+            strcpy(filename, argv[2]);
+            filename += strlen(argv[2]);
+            strcpy(filename, n_capture_s.str().c_str());
+            filename += strlen(n_capture_s.str().c_str());
+            strcpy(filename, ".trn");
+            filename -= (strlen(argv[2]) + strlen(n_capture_s.str().c_str()));
+            printf("before writing to file trns depth image %s\n", filename);
+
+            writefile(transformed_depth_image, filename);
 
             k4a_capture_release(capture);
             
