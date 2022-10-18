@@ -10,9 +10,9 @@ import glob
 import numpy as np
 from numpy import savetxt
 
-rows = 7 #number of checkerboard rows.
-columns = 4 #number of checkerboard columns.
-world_scaling = 9. #change this to the real world square size. Or not.
+rows = 9 #number of checkerboard rows.
+columns = 6 #number of checkerboard columns.
+world_scaling = 1. #change this to the real world square size. Or not.
 
 
 def calibrate_camera(images_folder):
@@ -140,13 +140,13 @@ def stereo_calibrate(mtx1, dist1, mtx2, dist2, cam1dir,cam2dir):
 dirpath='C:\\Users\\lahir\\fstack_data\\calibration\\'
 mtx1, dist1,ngoodimages1 = calibrate_camera(images_folder = dirpath+'phone\\*')
 mtx2, dist2,ngoodimages2 = calibrate_camera(images_folder = dirpath+'kinect\\*')
-R, T,ngoodpaits = stereo_calibrate(mtx1, dist1, mtx2, dist2, dirpath+'phone\\*',dirpath+'kinect\\*')
+R, T,ngoodpaits = stereo_calibrate(mtx2, dist2, mtx1, dist1, dirpath+'phone\\*',dirpath+'kinect\\*')
 
 #write the matrices to disk
 savetxt(dirpath+'phone_calib.csv', mtx1, delimiter=',')
 savetxt(dirpath+'phone_dist.csv', dist1, delimiter=',')
 savetxt(dirpath+'kinect_calib.csv', mtx2, delimiter=',')
 savetxt(dirpath+'kinect_dist.csv', dist2, delimiter=',')
-savetxt(dirpath+'phonetoazure_R.csv', R, delimiter=',')
-savetxt(dirpath+'phonetoazure_T.csv', T, delimiter=',')
+savetxt(dirpath+'azuretophone_R.csv', R, delimiter=',')
+savetxt(dirpath+'azuretophone_T.csv', T, delimiter=',')
 

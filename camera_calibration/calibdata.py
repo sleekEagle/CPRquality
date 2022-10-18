@@ -27,7 +27,7 @@ def get_homo(mtx):
 
 R=np.random.rand(3,3)
 T=np.random.rand(3,1)
-#concatenate the R and T matrices to form the 3x4 trans matrix
+#concatenate the R and T matrices to form the 4x4 trans matrix
 #R should be 3x3, T should be 3x1
 def get_transmtx_from_RT(R,T):
     RT=np.concatenate((R,T),axis=1)

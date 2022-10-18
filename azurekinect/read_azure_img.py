@@ -24,18 +24,3 @@ def read_ptc(file):
     z=data[ind%3==2]
     return x,y,z
 
-img=read_csv_data(r'C:\Users\lahir\fstack_data\data\10_18_2022_10_02_10\000.trn')
-img=img.reshape(transformed_shape)
-plt.imshow(img, interpolation='nearest')
-plt.show()
-
-
-x,y,z=read_ptc(r'C:\Users\lahir\fstack_data\data\10_18_2022_10_02_10\000.ptc')
-y=y.reshape(transformed_shape)
-plt.imshow(y, interpolation='nearest')
-plt.show()
-
-dist=np.sqrt(x*x + y*y + z*z)
-dist=dist.reshape(transformed_shape)
-plt.imshow(dist, interpolation='nearest')
-plt.show()
