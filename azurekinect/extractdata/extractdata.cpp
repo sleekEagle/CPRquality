@@ -299,16 +299,6 @@ int main(int argc, char** argv)
             
             writefile(point_cloud_image, filename);
 
-            strcpy(filename, argv[2]);
-            filename += strlen(argv[2]);
-            strcpy(filename, n_capture_s.str().c_str());
-            filename += strlen(n_capture_s.str().c_str());
-            strcpy(filename, ".trn");
-            filename -= (strlen(argv[2]) + strlen(n_capture_s.str().c_str()));
-            printf("before writing to file trns depth image %s\n", filename);
-
-            writefile(transformed_depth_image, filename);
-
             k4a_capture_release(capture);
             
             n_capture++;
