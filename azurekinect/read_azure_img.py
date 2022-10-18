@@ -3,8 +3,9 @@ from PIL import Image
 import csv
 import sys
 import cv2
+from matplotlib import pyplot as plt
 
-transformed_shape=(1280,720)
+transformed_shape=(720,1280)
 
 def read_csv_data(path):
     with open(path, "r") as filestream:
@@ -22,3 +23,4 @@ def read_ptc(file):
     y=data[ind%3==1]
     z=data[ind%3==2]
     return x,y,z
+
