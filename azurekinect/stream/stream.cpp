@@ -115,10 +115,10 @@ int main(int argc, char** argv)
     
 
     k4a_device_configuration_t config = K4A_DEVICE_CONFIG_INIT_DISABLE_ALL;
-    config.camera_fps = K4A_FRAMES_PER_SECOND_30;
+    config.camera_fps = K4A_FRAMES_PER_SECOND_15;
     config.color_format = K4A_IMAGE_FORMAT_COLOR_BGRA32;
     config.color_resolution = K4A_COLOR_RESOLUTION_720P;
-    config.depth_mode = K4A_DEPTH_MODE_NFOV_UNBINNED;
+    config.depth_mode = K4A_DEPTH_MODE_WFOV_UNBINNED;
     config.synchronized_images_only = true;
     
 
