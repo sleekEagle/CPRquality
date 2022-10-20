@@ -116,6 +116,8 @@ If there are multiple images with the same focal distance, only selects one of t
 coppies them to newpath/dirname
 dirname is the name of the directory in the path where focal stack images are.
 '''
+path=r'C:\Users\lahir\fstack_data\data\10_20_2022_10_05_21'
+newpath=r'C:\Users\lahir\fstack_data\data_processed\10_20_2022_10_05_21'
 def copy_fs_files_to_dir(path,newpath):
     files=os.listdir(path)
     #get only one instance from one focal distance
@@ -130,7 +132,7 @@ def copy_fs_files_to_dir(path,newpath):
 
     for f in ufiles:
         img = cv2.imread(path+'\\'+f)
-        res=cv2.imwrite(newpath+'\\'+ '_'.join(f.split('.')[:-1])+'.png' ,img)
+        res=cv2.imwrite(newpath+'\\'+  f[:-3]+'png' ,img)
 
 
 
