@@ -130,26 +130,31 @@ def copy_fs_files_to_dir(path,newpath):
 
     for f in ufiles:
         img = cv2.imread(path+'\\'+f)
-        res=cv2.imwrite(newpath+'\\'+dirtomake+'\\'+f,img)
+        res=cv2.imwrite(newpath+'\\'+f,img)
 
 
 
-ptcfile=r'C:\Users\lahir\fstack_data\data\10_18_2022_16_20_44\000.ptc'
 phonecalibfile=r'C:\Users\lahir\fstack_data\calibration\phone_calib.csv'
 Rpath=r'C:\Users\lahir\fstack_data\calibration\azuretophone_R.csv'
 Tpath=r'C:\Users\lahir\fstack_data\calibration\azuretophone_T.csv'
-newpath=r'C:\Users\lahir\fstack_data\data_processed'
-path=r'C:\Users\lahir\fstack_data\data\10_18_2022_16_20_44'
 
-#make new directory with to contain the focal stack and depth image
-dirtomake=path.split('\\')[-1]
-if not os.path.exists(newpath+'\\'+dirtomake):
-    os.makedirs(newpath+'\\'+dirtomake)
-depthpath=newpath+'\\'+dirtomake+'\\'+'depth.png'
-#save depth image
-save_transformed_depth_image(ptcfile,phonecalibfile,Rpath,Tpath,depthpath)
-#copy focal stack 
-copy_fs_files_to_dir(path,newpath)
+path=r'C:\Users\lahir\fstack_data\data'
+newpath=r'C:\Users\lahir\fstack_data\data_processed'
+
+
+dirs=os.listdir(path)
+for dirname in dirs:
+    if not os.path.exists(newpath+'\\'+dirname):
+        os.makedirs(newpath+'\\'+dirname)
+    print('creating processed fstack... '+newpath+'\\'+dirname)
+    depthpath=newpath+'\\'+dirname+'\\'+'depth.png'
+    files=os.listdir(path+'\\'+dirname)
+    ptcfile=[f for f in files if (f.split('.')[-1]=='ptc')]
+
+    #save depth image
+    save_transformed_depth_image(path+'\\'+dirname+'\\'+ptcfile[0],phonecalibfile,Rpath,Tpath,depthpath)
+    #copy focal stack 
+    copy_fs_files_to_dir(path+'\\'+dirname,newpath+'\\'+dirname)
 
 
 
