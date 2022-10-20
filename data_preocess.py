@@ -130,7 +130,7 @@ def copy_fs_files_to_dir(path,newpath):
 
     for f in ufiles:
         img = cv2.imread(path+'\\'+f)
-        res=cv2.imwrite(newpath+'\\'+f,img)
+        res=cv2.imwrite(newpath+'\\'+ '_'.join(f.split('.')[:-1])+'.png' ,img)
 
 
 
