@@ -140,23 +140,26 @@ phonecalibfile=r'C:\Users\lahir\fstack_data\calibration\phone_calib.csv'
 Rpath=r'C:\Users\lahir\fstack_data\calibration\azuretophone_R.csv'
 Tpath=r'C:\Users\lahir\fstack_data\calibration\azuretophone_T.csv'
 
-path=r'C:\Users\lahir\fstack_data\data'
+path=r'C:\Users\lahir\fstack_data\data1'
 newpath=r'C:\Users\lahir\fstack_data\data_processed'
 
 
 dirs=os.listdir(path)
 for dirname in dirs:
-    if not os.path.exists(newpath+'\\'+dirname):
-        os.makedirs(newpath+'\\'+dirname)
-    print('creating processed fstack... '+newpath+'\\'+dirname)
-    depthpath=newpath+'\\'+dirname+'\\'+'depth.png'
-    files=os.listdir(path+'\\'+dirname)
-    ptcfile=[f for f in files if (f.split('.')[-1]=='ptc')]
+    try:
+        if not os.path.exists(newpath+'\\'+dirname):
+            os.makedirs(newpath+'\\'+dirname)
+        print('creating processed fstack... '+newpath+'\\'+dirname)
+        depthpath=newpath+'\\'+dirname+'\\'+'depth.png'
+        files=os.listdir(path+'\\'+dirname)
+        ptcfile=[f for f in files if (f.split('.')[-1]=='ptc')]
 
-    #save depth image
-    save_transformed_depth_image(path+'\\'+dirname+'\\'+ptcfile[0],phonecalibfile,Rpath,Tpath,depthpath)
-    #copy focal stack 
-    copy_fs_files_to_dir(path+'\\'+dirname,newpath+'\\'+dirname)
+        #save depth image
+        save_transformed_depth_image(path+'\\'+dirname+'\\'+ptcfile[0],phonecalibfile,Rpath,Tpath,depthpath)
+        #copy focal stack 
+        copy_fs_files_to_dir(path+'\\'+dirname,newpath+'\\'+dirname)
+    except:
+        print("Exception!")
 
 
 
