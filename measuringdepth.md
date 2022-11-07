@@ -22,8 +22,12 @@ argument 1 : input data .mkv file \
 argument 2: output data directory \
 output : for each frame of the data file, (frame rate is either 30 or 15 frames per second depending on the setting used. To change this, edit azurekinect\stream\stream.cpp) this calculates a point cloud file (custom format). \
 Format of the point cloud file (.ptc) : \
--1028,-587,1012,-1027,-588,1013,-1026,-589,1014,-1025,-588,1014,-1024,...... \ 
+-1028,-587,1012,-1027,-588,1013,-1026,-589,1014,-1025,-588,1014,-1024, \ 
 (value[0],value[1],value[2]) are the x,y,z positions for the first pixel of the RGB image. \
+
+
+## Step 2 : Run the hand detection model on the captured RGB video
+
 
 
 
