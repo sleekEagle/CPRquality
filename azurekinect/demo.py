@@ -1,5 +1,6 @@
 import os
 import sys
+import csv
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -11,6 +12,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import subprocess
+import Arduino.readdistsensor
 
 #extract images
 out = subprocess.run('ffmpeg -i C:\\Users\\lahir\\CPRdata\\vid.mkv -map 0:0  -vsync 0 C:\\Users\\lahir\\CPRdata\\outputs\\rgb%04d.png', shell=True)
@@ -20,7 +22,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
 #read rgb images from a directory
-rgbpath="C:\\Users\\lahir\\CPRdata\\outputs\\"
+rgbpath="C:\\Users\\lahir\\CPRdata\\data2\\outputs\\"
 dir_list = os.listdir(rgbpath)
 dir_list.sort()
 imgs=[rgbpath+file for file in dir_list if (file.split('.')[-1]=='png')]
@@ -29,7 +31,7 @@ imgs=[rgbpath+file for file in dir_list if (file.split('.')[-1]=='png')]
 image = cv2.imread(imgs[0])
 image_height, image_width, _ = image.shape
 fourcc = cv2.VideoWriter_fourcc('M','J','P','G')
-video = cv2.VideoWriter('C:\\Users\\lahir\\CPRdata\\outputs\\annotated\\vid.avi', fourcc, 30, (image_width, image_height))
+video = cv2.VideoWriter('C:\\Users\\lahir\\CPRdata\\data2\\outputs\\annotated\\vid.avi', fourcc, 30, (image_width, image_height))
 
 wrist_coords=[]
 with mp_hands.Hands(
@@ -61,16 +63,32 @@ with mp_hands.Hands(
         annoimg=cv2.circle(image, (relative_x, relative_y), radius=30, color=(0, 255, 0), thickness=3)
         label = "({0},{1})".format(relative_x, relative_y)
         annoimg=cv2.putText(image,label, (relative_x+30,relative_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0),2)
-        cv2.imwrite('C:\\Users\\lahir\\CPRdata\\outputs\\annotated\\' + str(idx) + '.png', annoimg)
+        cv2.imwrite('C:\\Users\\lahir\\CPRdata\\data2\\outputs\\annotated\\' + str(idx) + '.png', annoimg)
         video.write(annoimg)
 
 
 from matplotlib import pyplot as plt
-transformed_shape=(720,1280)   
+transformed_shape=(720,1280)  
 
+#read timestamps
+tsfile='C:\\Users\\lahir\\CPRdata\\data2\\ts.txt'
+def read_ts(file):
+    ts=[]
+    with open(file, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in spamreader:
+            try:
+                splt= (', '.join(row)).split()
+                ts_=int(splt[0])
+                ts.append(ts_)
+            except Exception as e:
+                print(str(e))
+    return ts
+
+allts=read_ts(tsfile)
 wrist_coords_xyz=np.empty([0, 3])
 valid_ind=[]
-ptcpasth="C:\\Users\\lahir\\CPRdata\\outputs\\transformed\\"
+ptcpasth="C:\\Users\\lahir\\CPRdata\\data2\\outputs\\transformed\\"
 WRISTWINDOW=5
 for i,wrist in enumerate(wrist_coords):
     if(not(len(wrist)==2)):
@@ -88,7 +106,7 @@ for i,wrist in enumerate(wrist_coords):
         print(ptcfile)
 
 #get gravity direction (what vector is down ?)
-accfile=r"C:\\Users\\lahir\\CPRdata\\acc.csv"
+accfile=r"C:\\Users\\lahir\\CPRdata\\data2\\acc.csv"
 ts,gravity=azureimu.get_gravity(accfile)
 #get gravity wrt rgb camera coordinate frame
 gravity=azureimu.transform_acc_to_RGB(gravity)
@@ -99,11 +117,86 @@ projections=[]
 for i in range(wrist_coords_xyz.shape[0]):
     projections.append(np.dot(wrist_coords_xyz[i,:],gravity))
 
+outfile='C:\\Users\\lahir\\CPRdata\\data2\\outputs\\movement.txt'
+header = ['ts', 'dist']
+with open(outfile, 'w', encoding='UTF8') as f:
+    writer = csv.writer(f)
+    writer.writerow(header)
+    for i,ind in enumerate(valid_ind):
+        data=[]
+        data.append(str(allts[ind]))
+        data.append(str(projections[i]))
+        writer.writerow(data)
+
 plt.plot(projections)
 plt.title('Wrist position perpendicular to the floor in mm')
 plt.xlabel('frame number')
 plt.savefig('C:\\Users\\lahir\\CPRdata\\outputs\\wristpos.png')
 plt.show()
+
+
+#read distance from dist sensor
+
+depthts,depthvals=Arduino.readdistsensor.get_depthdata(r'C:\Users\lahir\Documents\CPR Quality Data\CoolTerm Capture 2022-10-20 15-15-25.txt')
+#manually check the valid range of the depths (where actual CPR is taking place)
+valid_depthvals=depthvals[1260:5575]
+#read the visually calcualted depths from file
+file=r'C:\Users\lahir\CPRdata\data2\outputs\movement.txt'
+def read_depth(file):
+    vals=[]
+    with open(file, newline='') as csvfile:
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in spamreader:
+            try:
+                splt= (', '.join(row)).split()
+                val_=float(splt[1])
+                vals.append(val_)
+            except Exception as e:
+                print(str(e))
+    return vals
+
+
+visual_depth=read_depth(file)
+valid_visualdepth=visual_depth[7:]
+#remove outliers
+valid_visualdepth=np.array(valid_visualdepth)
+outlier=np.abs((valid_visualdepth-np.mean(valid_visualdepth))/np.std(valid_visualdepth))<1.5
+valid_visualdepth=valid_visualdepth[outlier]
+visual_zeromean=valid_visualdepth-np.mean(valid_visualdepth)
+
+
+kernel_size = 5
+kernel = np.ones(kernel_size) / kernel_size
+depth_conv = np.convolve(valid_depthvals, kernel, mode='same')
+
+from scipy import signal
+depth_resampled = signal.resample(depth_conv, 534)
+depth_resampled_zeromean=depth_resampled-np.mean(depth_resampled)
+
+
+
+plt.plot(depth_resampled_zeromean)
+plt.plot(visual_zeromean)
+plt.xlabel('Sample number')
+plt.ylabel('Distance from mean in mm')
+plt.legend(['VL6180 sensor', 'Kinect depth+hand detection'])
+plt.savefig(r'C:\Users\lahir\CPRdata\data2\outputs\bothdist.png',dpi=500)
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

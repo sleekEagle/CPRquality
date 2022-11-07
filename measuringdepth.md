@@ -26,7 +26,24 @@ Format of the point cloud file (.ptc) : \
 (value[0],value[1],value[2]) are the x,y,z positions for the first pixel of the RGB image. \
 
 
-## Step 2 : Run the hand detection model on the captured RGB video
+## Step 2 : Visually extract the CPR depth 
+The code for this is in demo.py \ 
+In this code, 
+1. We extract frames (RGB images) from the video with ffmpeg (see the code) \
+2. Use Google media pipe to extract wrist position of the top hand (this process needs more fine-tuning) \
+3. Get the (x,y,z) position relavent to the wrist position from the relavent point cloud file \
+4. Calculate the direction of gravity from accelerometer data file \ 
+5. Calculate the the verticle distance to the wrist from camera (project xyz positions in the direction of gravity)
+
+
+## Experiment 1 : compare the depth measurements from VL6180 sensor fixed in the duummy and point clouds from Kinect
+1. Read the VL6180 data using readdistsensor.py /
+See code in demo.py (datacollect git branch) on how to get the following plot \ 
+
+![Distance measurement Kinect vs VL6180 sensor](plots/kinect_vs_VL1680.png)
+
+
+
 
 
 
